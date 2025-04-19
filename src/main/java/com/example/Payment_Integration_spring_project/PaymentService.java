@@ -26,10 +26,35 @@ public class PaymentService {
 	@Autowired
 	PaymentRepo paymentRepo;
 	
+	@Autowired
+	PaypalConfig paypalConfig;
+	
 	public List<Payment> displays(){
 		List<Payment> list = paymentRepo.findAll();
 		return list;
 	}
 	
 	
+	private RestTemplate restTemplate = new RestTemplate();
+	
+	public String gettoken() {
+		
+		String credentials = paypalConfig.getId() + ":" + paypalConfig.getSecret();
+		String encodedcredentials = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+
+		
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.set("Authorization", "Basic " + encodedcredentials);
+		httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		
+		HttpEntity<String> request = new HttpEntity<String>("grant_type=client_credentials", httpHeaders);
+		
+		ResponseEntity<String> response = restTemplate.exchange(paypalConfig.getApiBaseurl() + "/v1/oauth2/token",HttpMethod.POST,request,String.class);
+		
+		JSONObject jsonObject = new JSONObject(response.getBody());
+		System.out.println("PayPal Token Response: " + jsonObject.toString());
+		return jsonObject.getString("access_token");
+		
+	}
+
 }
