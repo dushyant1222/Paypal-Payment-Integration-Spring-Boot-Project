@@ -56,5 +56,51 @@ public class PaymentService {
 		return jsonObject.getString("access_token");
 		
 	}
+	
+
+	public String create_order(double amount) {
+		String accesstoken = gettoken();
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setBearerAuth(accesstoken);
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		JSONObject amountobj = new JSONObject();
+		amountobj.put("currency_code", "USD");
+		amountobj.put("value", amount);
+		
+		JSONObject purchaseunit = new JSONObject();
+		purchaseunit.put("amount", amountobj);
+		
+		JSONObject appcontext = new JSONObject();
+		appcontext.put("return_url", "http://localhost:8080/pay/sucess");
+		appcontext.put("cancel_url", "http://localhost:8080/pay/cancel");
+		
+		JSONObject payload = new JSONObject();
+		payload.put("intent", "CAPTURE");
+		payload.put("purchase_units", Collections.singletonList(purchaseunit));
+		payload.put("application_context", appcontext);
+		
+		HttpEntity<String> entity = new HttpEntity<String>(payload.toString(), headers);
+		
+		ResponseEntity<String> response = restTemplate.exchange(paypalConfig.getApiBaseurl() +  "/v2/checkout/orders", HttpMethod.POST,entity, String.class);
+		
+		JSONObject responsejson = new JSONObject(response.getBody());
+		System.out.println("PayPal Order Response: " + responsejson.toString());
+
+		for(Object linkObject: responsejson.getJSONArray("links")) {
+			
+			JSONObject link = (JSONObject) linkObject;
+			if(link.getString("rel").equals("approve")) {
+				return link.getString("href"); //approival link is heree
+				
+			}
+			System.out.println("Checking link: " + link.toString());
+
+		}
+		
+		return null;
+		
+	}
 
 }
