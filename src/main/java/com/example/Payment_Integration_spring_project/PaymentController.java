@@ -31,6 +31,26 @@ public class PaymentController {
 		return "index";
 	}
 	
+
+	
+	//Homepage
+	@GetMapping("/")
+	public String home() {
+		return "index";
+	}
+	
+	//create the order and redirect it to the paypal
+	@GetMapping("/pay")
+	public RedirectView payment() {
+		String approval_link = paymentService.create_order(10.00);
+		if (approval_link == null || approval_link.isEmpty()) {
+	        System.out.println("No approval link received!");
+	        return new RedirectView("/error"); // fallback
+	    }
+	    System.out.println("Redirecting to: " + approval_link);
+	    return new RedirectView(approval_link);
+		
+	}
 	
 	
 }

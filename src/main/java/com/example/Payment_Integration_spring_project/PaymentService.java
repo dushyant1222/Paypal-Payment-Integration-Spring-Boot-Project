@@ -102,5 +102,32 @@ public class PaymentService {
 		return null;
 		
 	}
+	
+
+	public String captureorder(String oderId) {
+		String accesstoken = gettoken();
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setBearerAuth(accesstoken);
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		HttpEntity<String> entity = new HttpEntity<String>(null,headers);
+		
+		ResponseEntity<String> response = restTemplate.exchange(paypalConfig.getApiBaseurl() + "/v2/checkout/orders/" + oderId + "/capture", HttpMethod.POST, entity, String.class);
+		
+		return response.getBody();
+		
+		
+	}
+	
+	
+	
+	@PostConstruct
+	public void debugConfig() {
+	    System.out.println("Validated Config:");
+	    System.out.println("Client ID: " + paypalConfig.getId());
+	    System.out.println("Secret: " + (paypalConfig.getSecret() != null ? "***" : "NULL"));
+	    System.out.println("API URL: " + paypalConfig.getApiBaseurl());
+	}
 
 }
