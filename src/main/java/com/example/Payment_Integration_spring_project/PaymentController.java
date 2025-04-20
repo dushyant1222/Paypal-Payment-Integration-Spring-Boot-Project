@@ -51,6 +51,19 @@ public class PaymentController {
 	    return new RedirectView(approval_link);
 		
 	}
+
+	//paypal return to this url after success
+	@GetMapping("/pay/sucess")
+	public String sucess(@RequestParam("token") String orderId) {
+		String response = paymentService.captureorder(orderId);
+		System.out.println("Payment sucess response: "+ response);
+		return "sucess";
+		
+	}
+	@GetMapping("/pay/cancel")
+	public String cancel() {
+		return "cancel";
+	}
 	
 	
 }
